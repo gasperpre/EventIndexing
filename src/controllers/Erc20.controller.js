@@ -7,6 +7,8 @@ const Erc20Transfer = require("../models/Erc20Transfer.model");
  * Starts syncing ERC20 transfer events to the database for the specified token
  * @param {String} token_name
  * @param {String} token_address 
+ * @param {Number} starting_block
+ * @param {Boolean} resync 
  * @return {Promise<void>}
  */
 const syncErc20Transfers = async (token_name, token_address, starting_block = 0, resync = false) => {
@@ -70,7 +72,7 @@ const syncErc20Transfers = async (token_name, token_address, starting_block = 0,
  * @param {String} contract_address 
  * @param {Number} start_block 
  * @param {Number} end_block 
- * @returns 
+ * @returns {Promise<Number>}
  */
 const getCreationBlock = async (provider, contract_address, start_block, end_block) => {
 
