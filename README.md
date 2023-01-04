@@ -1,8 +1,3 @@
-
-**Answers to first part of the test (Basic) are in `basic.js`**
-
-# Token API
-
 A Node application that can track ERC20 contracts deployed on Ethereum
 and store the transactions on continuous basis. The transactions can then be retrieved
 through the API by clients with API key.
