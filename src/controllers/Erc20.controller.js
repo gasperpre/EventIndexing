@@ -51,7 +51,7 @@ const syncErc20Transfers = async (token_name, token_address, starting_block = 0,
                 if(to_block > current_block) to_block = current_block;
 
                 const transfers = await contract.queryFilter("Transfer", from_block + 1, to_block);
-                console.log(transfers.length);
+
                 saveTransfers(token_name, transfers);
 
                 from_block += blocks_per_call;
@@ -73,7 +73,7 @@ const syncErc20Transfers = async (token_name, token_address, starting_block = 0,
  * @returns 
  */
 const getCreationBlock = async (provider, contract_address, start_block, end_block) => {
-    console.log(start_block, end_block);
+
     if(start_block === end_block) return start_block;
 
     const mid_block = Math.floor((start_block + end_block) / 2);
@@ -97,7 +97,7 @@ const saveTransfers = async (token_name, transfers) => {
 
         transfers.forEach(transfer => {
             const {transactionHash, logIndex, blockNumber, transactionIndex, args} = transfer;
-            console.log(transactionHash);
+
             try {
                 Erc20Transfer.create({
                     token_name,
