@@ -36,6 +36,21 @@ const Erc20Transfer = sequelize.define('Erc20Transfer', {
 			type: DataTypes.STRING,
 			allowNull: true
 		}
-  	});
+  	}, {
+		indexes: [
+			{
+				unique: false,
+				fields: ['from_address']
+			},
+			{
+				unique: false,
+				fields: ['to_address']
+			},
+			{
+				unique: false,
+				fields: ['token_name']
+			}
+		]
+	});
 
 module.exports = Erc20Transfer;
