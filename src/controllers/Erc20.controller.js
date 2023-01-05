@@ -28,8 +28,6 @@ const syncErc20Transfers = async (token_name, token_address, starting_block = 0,
         contract.on("Transfer", (from, to, value, transaction) => {
             if(current_block === transaction.blockNumber) return;
             saveTransfers(token_name, [transaction]);
-            updateErc20BalanceForAddress(token_name, from, transaction.blockNumber, contract);
-            updateErc20BalanceForAddress(token_name, to, transaction.blockNumber, contract);
         });
 
         // SYNC OLD TRANSFERS
