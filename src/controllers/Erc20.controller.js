@@ -1,4 +1,5 @@
 const ethers = require("ethers");
+const { Op } = require("sequelize");
 const abi = require("../contracts/erc20.json");
 const sequelize = require("../database");
 const Erc20Transfer = require("../models/Erc20Transfer.model");
@@ -120,45 +121,37 @@ const saveTransfers = async (token_name, transfers) => {
     }
 }
 
+
 const getErc20Transfers = async (req, res) => {
-    const token_name = req.params.token_name;
-    const page_size = Number(req.query.page_size || 100);
-    const page = Number(req.query.page || 1);
-    const address = req.query.address || null;
-
-    let query = `
-        SELECT transaction_hash, log_index, block_number, transaction_index, from_address, to_address, value
-        FROM erc20transfers
-        WHERE token_name = '${token_name}'`;
-
-    let query_total = `SELECT COUNT(*) as total FROM erc20transfers WHERE token_name = '${token_name}'`;
-
-    if(address) {
-        query_total += ` AND (from_address = '${address}' OR to_address = '${address}')`;
-        query += ` AND (from_address = '${address}' OR to_address = '${address}')`;
-    }
-
-    query += " ORDER BY block_number DESC, log_index DESC";
-
-    if(page > 1) {
-        query += " LIMIT " + (page * page_size) + "," + page_size;
-    } else {
-        query += " LIMIT " + page_size;
-    }
-
     try {
-        const query_total_res = await sequelize.query(query_total);
-        const total_records = query_total_res[0][0].total;
+        const token_name = req.params.token_name;
+        const page_size = Number(req.query.page_size || 100);
+        const page = Number(req.query.page || 1);
+        const address = req.query.address || null;
+
+        const params = {
+            limit: page_size,
+            offset: page > 1 ? (page - 1) * page_size : 0,
+            where: { token_name }
+        };
+
+        if(address) {
+            params.where[Op.or] = [
+                { from_address: address },
+                { to_address: address }
+            ];
+        }
+
+        const transfers = await Erc20Transfer.findAndCountAll(params);
+        const total_records = transfers.count;
         const total_pages = Math.ceil(total_records / page_size);
 
         if(total_pages < page) throw new Error(`Requested page ${page} of ${total_pages}`);
 
-        const query_res = await sequelize.query(query);
-        res.status(200).json({total_records, page, page_size, total_pages, data: query_res[0]});
+        res.status(200).json({total_records, page, page_size, total_pages, data: transfers.rows});
     } catch (e) {
         res.status(400).json({error: e.code === "ER_NO_SUCH_TABLE" ? `No records for ${token_name}` : e.message});
     }
 }
-
 
 module.exports = {syncErc20Transfers, getErc20Transfers};
